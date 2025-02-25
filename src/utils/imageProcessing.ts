@@ -39,12 +39,20 @@ export const cropImage = async (
     const scale = manualPosition.scale || 1;
     const scaledWidth = image.width * scale;
     const scaledHeight = image.height * scale;
+    
+    // Calculate the source coordinates for cropping
+    const sourceX = -manualPosition.x / scale;
+    const sourceY = -manualPosition.y / scale;
+    const sourceWidth = width / scale;
+    const sourceHeight = height / scale;
+    
+    // Draw the cropped portion of the image
     ctx.drawImage(
       image,
-      manualPosition.x + padding,
-      manualPosition.y + padding,
-      scaledWidth,
-      scaledHeight,
+      sourceX,
+      sourceY,
+      sourceWidth,
+      sourceHeight,
       padding,
       padding,
       width,

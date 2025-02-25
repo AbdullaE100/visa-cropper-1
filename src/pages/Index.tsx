@@ -93,21 +93,35 @@ export default function Index() {
   }, [originalImage]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!previewImage) return;
+    if (!previewImage || !selectedDimensions) return;
     const rect = e.currentTarget.getBoundingClientRect();
+    const containerCenterX = rect.width / 2;
+    const containerCenterY = rect.height / 2;
+    
+    // Calculate the scale factor between preview and target dimensions
+    const scaleFactorX = selectedDimensions.width / rect.width;
+    const scaleFactorY = selectedDimensions.height / rect.height;
+    
     setDragStart({
-      x: e.clientX - rect.left - cropPosition.x,
-      y: e.clientY - rect.top - cropPosition.y
+      x: (e.clientX - rect.left - containerCenterX - cropPosition.x) * scaleFactorX,
+      y: (e.clientY - rect.top - containerCenterY - cropPosition.y) * scaleFactorY
     });
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!dragStart || !previewImage) return;
-
+    if (!dragStart || !previewImage || !selectedDimensions) return;
+  
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left - dragStart.x;
-    const y = e.clientY - rect.top - dragStart.y;
-
+    const containerCenterX = rect.width / 2;
+    const containerCenterY = rect.height / 2;
+    
+    // Apply the same scale factors for consistent movement
+    const scaleFactorX = selectedDimensions.width / rect.width;
+    const scaleFactorY = selectedDimensions.height / rect.height;
+    
+    const x = (e.clientX - rect.left - containerCenterX - dragStart.x) / scaleFactorX;
+    const y = (e.clientY - rect.top - containerCenterY - dragStart.y) / scaleFactorY;
+  
     setCropPosition(prev => ({
       ...prev,
       x,
@@ -330,7 +344,9 @@ export default function Index() {
                                 alt="Preview"
                                 className="absolute cursor-move"
                                 style={{
-                                  transform: `translate(${cropPosition.x}px, ${cropPosition.y}px) scale(${cropPosition.scale})`,
+                                  left: '50%',
+                                  top: '50%',
+                                  transform: `translate(-50%, -50%) translate(${cropPosition.x}px, ${cropPosition.y}px) scale(${cropPosition.scale})`,
                                   transformOrigin: 'center',
                                   transition: dragStart ? 'none' : 'transform 0.1s ease-out'
                                 }}
